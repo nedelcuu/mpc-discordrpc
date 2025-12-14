@@ -2,8 +2,8 @@ const log = require('fancy-log');
 
 log.info('INFO: Loading...');
 
-const axios = require('axios'),
-	{ Client } = require('@xhayper/discord-rpc'),
+const axios = require('axios').default,
+	{ Client } = require('discord-rpc'),
 	updatePresence = require('./core'),
 	events = require('events'),
 	config = require('./config'),
@@ -25,12 +25,11 @@ const uri = `http://127.0.0.1:${config.port}/variables.html`;
 log.info('INFO: Fully ready. Trying to connect to Discord client...');
 
 // When it succesfully connects to MPC Web Interface, it begins checking MPC
-// every 1 second for real-time live updates (modernized for 2025), getting its playback data 
-// and sending it to Discord Rich Presence through updatePresence() function from core.js.
+// every 5 seconds, getting its playback data and sending it to Discord Rich Presence
+// through updatePresence() function from core.js.
 mediaEmitter.on('CONNECTED', res => {
 	clearInterval(mpcServerLoop);
-	// Real-time updates every second for truly live experience
-	mpcServerLoop = setInterval(checkMPCEndpoint, 1000);
+	mpcServerLoop = setInterval(checkMPCEndpoint, 5000);
 	if (!active) {
 		log.info(`INFO: Connected to ${res.headers.server}`);
 	}
@@ -56,12 +55,12 @@ mediaEmitter.on('CONN_ERROR', code => {
 });
 
 // If RPC successfully connects to Discord client,
-// it will attempt to connect to MPC Web Interface immediately and then every 1 second. 
+// it will attempt to connect to MPC Web Interface every 15 seconds. 
 mediaEmitter.on('discordConnected', () => {
 	clearInterval(discordRPCLoop);
 	log.info('INFO: Connected to Discord. Listening MPC on ' + uri);
 	checkMPCEndpoint();
-	mpcServerLoop = setInterval(checkMPCEndpoint, 1000);
+	mpcServerLoop = setInterval(checkMPCEndpoint, 15000);
 });
 
 // If RPC gets disconnected from Discord Client,
@@ -84,19 +83,11 @@ function checkMPCEndpoint() {
 
 // Initiates a new RPC connection to Discord client.
 function initRPC(clientId) {
-	// Destroy any existing RPC connection before creating a new one
-	if (rpc) {
-		destroyRPC().catch(() => {});
-	}
-
-	// @xhayper/discord-rpc uses clientId in constructor
-	rpc = new Client({ clientId: clientId });
-	
+	rpc = new Client({ transport: 'ipc' });
 	rpc.on('ready', () => {
 		clearInterval(discordRPCLoop);
-		log.info('INFO: Discord RPC client is ready!');
 		mediaEmitter.emit('discordConnected');
-		rpc.once('disconnect', async () => {
+		rpc.transport.once('close', async () => {
 			await destroyRPC();
 			log.error('ERROR: Connection to Discord client was closed. Trying again in 10 seconds...');
 			mediaEmitter.emit('discordDisconnected');
@@ -104,29 +95,16 @@ function initRPC(clientId) {
 		});
 	});
 
-	rpc.on('error', (err) => {
-		log.error('ERROR: Discord RPC error: ' + err.message);
-	});
-
 	// Log in to the RPC server on Discord client, and check whether or not it errors.
-	rpc.login().catch((err) => {
-		log.warn('WARN: Connection to Discord has failed: ' + (err.message || err));
-		log.warn('WARN: Make sure Discord desktop app is running. Trying again in 10 seconds...');
+	rpc.login({ clientId }).catch(() => {
+		log.warn('WARN: Connection to Discord has failed. Trying again in 10 seconds...');
 	});
 }
 
 // Destroys any active RPC connection.
 async function destroyRPC() {
 	if (!rpc) return;
-	try {
-		if (typeof rpc.destroy === 'function') {
-			await rpc.destroy();
-		} else if (typeof rpc.disconnect === 'function') {
-			await rpc.disconnect();
-		}
-	} catch (err) {
-		log.error('ERROR: Failed to destroy RPC connection: ' + err.message);
-	}
+	await rpc.destroy();
 	rpc = null;
 }
 

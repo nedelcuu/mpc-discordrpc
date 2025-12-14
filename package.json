@@ -1,75 +1,31 @@
 {
   "name": "MPC-DiscordRPC",
-  "version": "1.0",
-  "description": "Discord Rich Presence for Media Player Classic (Home Cinema and Black Edition)",
+  "version": "0.5.0",
   "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/nedelcuu/MPC-DiscordRPC.git"
-  },
-  "bugs": {
-    "url": "https://github.com/nedelcuu/MPC-DiscordRPC/issues"
-  },
-  "homepage": "https://github.com/nedelcuu/MPC-DiscordRPC#readme",
-  "author": {
-    "name": "Alex Ionut",
-    "email": "contact@alexionut.ro",
-    "url": "https://github.com/nedelcuu"
-  },
+  "repository": "https://github.com/angeloanan/MPC-DiscordRPC.git",
+  "bugs": "https://github.com/angeloanan/MPC-DiscordRPC/issues",
+  "author": "angeloanan <anandavid2002@gmail.com>",
   "contributors": [
-    {
-      "name": "Alex Ionut",
-      "email": "contact@alexionut.ro",
-      "url": "https://github.com/nedelcuu"
-    },
-    {
-      "name": "angeloanan",
-      "email": "anandavid2002@gmail.com",
-      "url": "https://github.com/angeloanan"
-    },
-    {
-      "name": "Der-Eddy",
-      "url": "https://www.eddy-dev.net"
-    },
-    {
-      "name": "Lucas Miranda",
-      "email": "liddack@outlook.com",
-      "url": "https://github.com/liddack"
-    },
-    {
-      "name": "MaciejGorczyca",
-      "url": "https://github.com/MaciejGorczyca"
-    }
+    "Der-Eddy (https://www.eddy-dev.net)",
+    "Lucas Miranda <liddack@outlook.com>",
+    "MaciejGorczyca (https://github.com/MaciejGorczyca)"
   ],
   "os": [
     "win32"
   ],
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=8.3.0"
   },
   "scripts": {
     "start": "del /F /Q mpc-discordrpc.log && pm2 start pm2.config.js",
     "stop": "pm2 delete mpc-discordrpc"
   },
   "license": "MIT",
-  "keywords": [
-    "discord",
-    "rpc",
-    "rich-presence",
-    "discord-rpc",
-    "mpc",
-    "mpc-hc",
-    "mpc-be",
-    "media-player",
-    "media-player-classic",
-    "discord-status",
-    "discord-presence"
-  ],
   "dependencies": {
-    "axios": "^1.7.7",
-    "@xhayper/discord-rpc": "^1.1.1",
-    "fancy-log": "^2.0.0",
-    "jsdom": "^24.1.3",
-    "pm2": "^5.3.1"
+    "axios": "^0.24.0",
+    "discord-rpc": "^4.0.1",
+    "fancy-log": "^1.3.2",
+    "jsdom": "^11.6.2",
+    "pm2": "^5.1.2"
   }
 }
