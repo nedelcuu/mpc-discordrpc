@@ -6,14 +6,14 @@ const log = require('fancy-log'),
         replaceUnderscore, 
         showRemainingTime,  
         replaceDots,
+        port,
     } = require('./config'),
     { JSDOM } = jsdom;
 
 // Discord Rich Presence has a string length limit of 128 characters.
-// This little plugin (based on https://stackoverflow.com/a/43006978/7090367)
-// helps by trimming strings up to a given length.
-String.prototype.trimStr = function (length) {
-    return this.length > length ? this.substring(0, length - 3) + "..." : this;
+// This utility function helps by trimming strings up to a given length.
+const trimStr = (str, length) => {
+    return str.length > length ? str.substring(0, length - 3) + "..." : str;
 };
 
 // Defines playback data fetched from MPC.
@@ -61,10 +61,17 @@ const updatePresence = (res, rpc) => {
     const { document } = new JSDOM(res.data).window;
 
     // Gets relevant info from the DOM object.
-    let filename = playback.filename = document.getElementById('filepath').textContent.split("\\").pop().trimStr(128);
+    let filename = playback.filename = trimStr(document.getElementById('filepath').textContent.split("\\").pop(), 128);
     playback.state = document.getElementById('state').textContent;
     playback.duration = sanitizeTime(document.getElementById('durationstring').textContent);
     playback.position = sanitizeTime(document.getElementById('positionstring').textContent);
+    
+    // Get additional info if available
+    const durationMs = convert(document.getElementById('durationstring').textContent);
+    const positionMs = convert(document.getElementById('positionstring').textContent);
+    const progressPercent = durationMs > 0 ? Math.round((positionMs / durationMs) * 100) : 0;
+    const remainingMs = durationMs - positionMs;
+    const remainingTime = remainingMs > 0 ? formatTime(remainingMs) : '00:00';
 
     // Replaces underscore characters to space characters
     if (replaceUnderscore) playback.filename = playback.filename.replace(/_/g, " ");
@@ -72,8 +79,8 @@ const updatePresence = (res, rpc) => {
 	// Removes brackets and its content from filename if `ignoreBrackets` option
 	// is set to true
     if (ignoreBrackets) {
-        playback.filename = playback.filename.replace(/ *\[[^\]]*\]/g, "").trimStr(128);
-        if (playback.filename.substr(0, playback.filename.lastIndexOf(".")).length == 0) playback.filename = filename;
+        playback.filename = trimStr(playback.filename.replace(/ *\[[^\]]*\]/g, ""), 128);
+        if (playback.filename.substring(0, playback.filename.lastIndexOf(".")).length == 0) playback.filename = filename;
     }
 	
     // Replaces dots in filenames to space characters
@@ -83,50 +90,114 @@ const updatePresence = (res, rpc) => {
     }
 
 	// Removes filetype from displaying
-	if (ignoreFiletype) playback.filename = playback.filename.substr(0, playback.filename.lastIndexOf("."));
+	if (ignoreFiletype) playback.filename = playback.filename.substring(0, playback.filename.lastIndexOf("."));
 
-    // Prepares playback data for Discord Rich Presence.
+    // Prepares playback data for Discord Rich Presence with modern 2025 features.
     let payload = {
-        state: playback.duration + ' total',
+        state: undefined,
         startTimestamp: undefined,
         endTimestamp: undefined,
         details: playback.filename,
         largeImageKey: mpcFork === 'MPC-BE' ? 'mpcbe_logo' : 'default',
-        largeImageText: mpcFork,
+        largeImageText: playback.state !== '-1' ? `${mpcFork} • ${playback.duration}` : mpcFork,
         smallImageKey: states[playback.state].stateKey,
-        smallImageText: states[playback.state].string
+        smallImageText: states[playback.state].string,
+        // Modern Discord features (2025)
+        buttons: [],
+        party: undefined,
+        partySize: undefined
     };
+    
+    // Add modern buttons for media playback (if playing/paused)
+    // Discord Rich Presence buttons (2025 feature)
+    if (playback.state === '2' || playback.state === '1') {
+        payload.buttons = [
+            {
+                label: '🎬 Open MPC Web Interface',
+                url: `http://127.0.0.1:${port}/`
+            }
+        ];
+    }
+    
+    // Add party information for playback progress (modern 2025 feature)
+    // Shows progress as party size (e.g., "45/100" = 45% complete)
+    if (playback.state === '2' && durationMs > 0) {
+        payload.party = {
+            size: [progressPercent, 100],
+            id: 'mpc-playback-' + Date.now()
+        };
+    }
 
     // Makes changes to payload data according to playback state.
     switch (playback.state) {
         case '-1': // Idling
-            payload.state = states[playback.state].string;
+            payload.state = 'No media loaded';
             payload.details = undefined;
+            payload.largeImageText = mpcFork;
+            break;
+        case '0': // Stopped
+            payload.state = `⏹️ ${playback.duration} total`;
             break;
         case '1': // Paused
-            payload.state = playback.position + ' / ' + playback.duration;
+            payload.state = `⏸️ ${playback.position} / ${playback.duration} • ${progressPercent}%`;
             break;
         case '2': // Playing
             if (showRemainingTime) {
-                payload.endTimestamp = Date.now() + (convert(playback.duration) - convert(playback.position));
+                payload.state = `▶️ ${remainingTime} left • ${progressPercent}%`;
+                payload.endTimestamp = Date.now() + remainingMs;
             } else {
-                payload.startTimestamp = Date.now() - convert(playback.position);
+                // Modern format with emoji and better layout
+                payload.state = `▶️ ${playback.position} / ${playback.duration} • ${progressPercent}%`;
+                payload.startTimestamp = Date.now() - positionMs;
             }
             break;
     }
 
-    // Only sends presence updates if playback state changes or if playback position
-    // changes while playing.
-    if ((playback.state !== playback.prevState) || (
-        playback.state === '2' &&
-        convert(playback.position) !== convert(playback.prevPosition) + 5000
-    )) {
-        rpc.setActivity(payload)
-            .catch((err) => {
-                log.error('ERROR: ' + err);
-            });
+    // Modern 2025 approach: Real-time updates every second for truly live experience
+    // Update on state change, or every second while playing for live progress
+    const prevPositionMs = playback.prevPosition ? convert(playback.prevPosition) : 0;
+    const currentPositionMs = convert(playback.position);
+    const positionDelta = Math.abs(currentPositionMs - prevPositionMs);
+    
+    const shouldUpdate = (playback.state !== playback.prevState) || 
+        (playback.state === '2' && positionDelta >= 800) || // Update every ~1s while playing (800ms threshold for smooth updates)
+        (playback.state === '1' && positionDelta >= 500) || // Update when paused if position changes
+        (playback.state !== '2' && playback.state !== '-1' && playback.state === playback.prevState);
+    
+    if (shouldUpdate) {
+        // Clean up payload: remove undefined values for better compatibility
+        const cleanPayload = Object.fromEntries(
+            Object.entries(payload).filter(([_, v]) => v !== undefined)
+        );
+        
+        // Remove empty arrays/objects
+        if (cleanPayload.buttons && cleanPayload.buttons.length === 0) {
+            delete cleanPayload.buttons;
+        }
+        if (cleanPayload.party && !cleanPayload.party.size) {
+            delete cleanPayload.party;
+        }
+        
+        // @xhayper/discord-rpc uses user.setActivity() instead of setActivity()
+        if (rpc.user) {
+            rpc.user.setActivity(cleanPayload)
+                .catch((err) => {
+                    log.error('ERROR: ' + err);
+                });
+        } else {
+            // Fallback for compatibility
+            if (typeof rpc.setActivity === 'function') {
+                rpc.setActivity(cleanPayload)
+                    .catch((err) => {
+                        log.error('ERROR: ' + err);
+                    });
+            }
+        }
+        const stateInfo = playback.state === '2' && showRemainingTime 
+            ? `${remainingTime} remaining`
+            : `${playback.position} / ${playback.duration} (${progressPercent}%)`;
         log.info('INFO: Presence update sent: ' +
-            `${states[playback.state].string} - ${playback.position} / ${playback.duration} - ${playback.filename}`
+            `${states[playback.state].string} - ${stateInfo} - ${playback.filename}`
         );
     }
 
@@ -157,9 +228,26 @@ const convert = time => {
  */
 const sanitizeTime = time => {
     if (time.split(':')[0] === '00') {
-        return time.substr(3, time.length - 1);
+        return time.substring(3);
     }
     return time;
+};
+
+/**
+ * Formats milliseconds to 'mm:ss' or 'hh:mm:ss' format.
+ * @param {number} ms Milliseconds to format
+ * @returns {string} Formatted time string
+ */
+const formatTime = ms => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    
+    if (hours > 0) {
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
 
 module.exports = updatePresence;
