@@ -47,7 +47,7 @@
 
 2. **Clone the Repository**
    ```bash
-   git clone https://github.com/nedelcuu/MPC-DiscordRPC.git
+   git clone [https://github.com/nedelcuu/MPC-DiscordRPC.git](https://github.com/nedelcuu/MPC-DiscordRPC.git)
    cd MPC-DiscordRPC
    ```
 
@@ -135,57 +135,44 @@ This application:
 ## 🐛 Troubleshooting
 
 ### Discord Rich Presence Not Showing
-
 - ✅ Make sure Discord **desktop app** is running (not web version)
 - ✅ Check that MPC Web Interface is enabled
 - ✅ Verify the port in `config.js` matches MPC's port
 - ✅ Restart both Discord and the application
 
 ### Connection Errors
-
 - ✅ Ensure MPC is running and Web Interface is enabled
 - ✅ Check firewall settings (port `13579` should be accessible)
 - ✅ Verify the port number in `config.js` is correct
 
 ### Updates Not Appearing
-
 - ✅ Check the log file: `mpc-discordrpc.log`
 - ✅ Ensure you're using the latest version
 - ✅ Try restarting the application: `npm stop && npm start`
 
 ## 🤝 Contributing
 
-Contributions are welcome! Feel free to:
+We welcome contributions from the community! Whether it's a bug fix, new feature, or documentation improvement:
 
-- 🐛 Report bugs
-- 💡 Suggest new features
-- 🔧 Submit pull requests
-- 📖 Improve documentation
+1. **🐛 Found a bug?** [Open an issue](https://github.com/nedelcuu/MPC-DiscordRPC/issues).
+2. **💡 Have an idea?** Start a discussion or submit a feature request.
+3. **🔧 Ready to code?** Fork the repo and submit a Pull Request.
 
-## 👥 Contributors
+## 📜 Credits & Legacy
 
-<div align="center">
+This project is a modern revival (2025) of the original MPC-DiscordRPC.
 
-**Maintainer & Modernization (2025)**
-- **[Alex Ionut](https://github.com/nedelcuu)** - *Modernization & Updates*
-
-**Original Creator & Contributors**
-- **[angeloanan](https://github.com/angeloanan)** - *Original Creator*
-- **[Der-Eddy](https://www.eddy-dev.net)** - *Contributor*
-- **[Lucas Miranda](https://github.com/liddack)** - *Contributor*
-- **[MaciejGorczyca](https://github.com/MaciejGorczyca)** - *Contributor*
-
-</div>
+| Role | User | Contribution |
+| :--- | :--- | :--- |
+| **Current Maintainer** | **[Alex Ionut](https://github.com/nedelcuu)** | Modernization, Node 18+ support, Refactoring |
+| **Original Creator** | **[angeloanan](https://github.com/angeloanan)** | Original concept and core logic |
+| **Contributor** | **[Der-Eddy](https://www.eddy-dev.net)** | Legacy updates |
+| **Contributor** | **[Lucas Miranda](https://github.com/liddack)** | Legacy updates |
+| **Contributor** | **[MaciejGorczyca](https://github.com/MaciejGorczyca)** | Legacy updates |
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Original project by [angeloanan](https://github.com/angeloanan)
-- Updated and modernized for 2025 with modern Discord RPC features
-- Built with ❤️ for the MPC community
 
 ## 📧 Contact
 
