@@ -1,105 +1,204 @@
-# MPC-DiscordRPC
-Discord Rich Presence for Media Player Classic (Home Cinema and Black Edition)
+# 🎬 MPC-DiscordRPC
 
-![Media Player Classic Home Cinema and Black Edition Rich Presence on Discord small profile](https://i.imgur.com/QAAJZgL.png)
+<div align="center">
 
-## How does this work?
-This program simply fetches playback data from MPC-HC / MPC-BE Web Interface, and displays it in your Discord profile through their wonderful [Rich Presence](https://discordapp.com/rich-presence) API.
+**Discord Rich Presence for Media Player Classic (Home Cinema and Black Edition)**
 
-Please note that this only works with [Discord desktop client](https://discordapp.com/download), not with the web app.
+*Show what you're watching on Discord with real-time updates!*
 
-## How to install
-1. Open your Media Player Classic, go to `View > Options > Player > Web Interface` and enable `Listen on port:` option. The default port is `13579`, but if you have changed it, please edit the `config.js` file after you download the project.
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)](https://www.microsoft.com/windows)
 
-![Enable the option "Listen on port"](https://cdn.discordapp.com/attachments/416273308540207116/428748994307424256/unknown.png)
+</div>
 
-2. Install [`Node.JS`](https://nodejs.org/en/download/current/) (we recommend using the latest version).
+---
 
-3. [Download this project as a .zip file](https://github.com/angeloanan/MPC-DiscordRPC/archive/master.zip), extract it and open a terminal window in the project directory. Otherwise, if you have [Git](https://git-scm.com/) installed, run:
+## ✨ Features
 
-```sh
-git clone https://github.com/angeloanan/MPC-DiscordRPC.git && cd MPC-DiscordRPC
+- 🎯 **Real-time Updates** - Updates every second for live playback progress
+- 🎨 **Modern Rich Presence** - Beautiful Discord presence with emojis and progress indicators
+- 📊 **Progress Tracking** - Shows playback percentage and time remaining
+- 🎮 **Interactive Buttons** - Quick access to MPC Web Interface
+- 🔄 **Auto-reconnect** - Automatically reconnects if Discord or MPC disconnects
+- ⚙️ **Highly Configurable** - Customize filename display, time format, and more
+
+## 🎥 Preview
+
+![Media Player Classic Rich Presence on Discord](http://i.imgur.com/CX1nler.png)
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- **Node.js** 18.0.0 or higher ([Download](https://nodejs.org/en/download/current/))
+- **MPC-HC** or **MPC-BE** with Web Interface enabled
+- **Discord Desktop App** (not the web version)
+
+### Installation
+
+1. **Enable MPC Web Interface**
+   - Open Media Player Classic
+   - Go to `View > Options > Player > Web Interface`
+   - Enable `Listen on port:` (default: `13579`)
+   - Click OK
+
+   ![Enable Web Interface](https://cdn.discordapp.com/attachments/416273308540207116/428748994307424256/unknown.png)
+
+2. **Clone the Repository**
+   ```bash
+   git clone https://github.com/nedelcuu/MPC-DiscordRPC.git
+   cd MPC-DiscordRPC
+   ```
+
+3. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+   > 💡 You can safely ignore peer and optional dependency warnings.
+
+4. **Start the Application**
+   ```bash
+   npm start
+   ```
+   > 🎉 The app runs in the background - you can close the terminal!
+
+5. **Stop the Application** (when needed)
+   ```bash
+   npm stop
+   ```
+
+## 📖 Configuration
+
+Edit `config.js` to customize your experience:
+
+### Available Options
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `port` | `13579` | MPC Web Interface port number |
+| `ignoreBrackets` | `true` | Remove `[tags]` from filenames (e.g., `[1080p]`, `[Group Name]`) |
+| `ignoreFiletype` | `false` | Hide file extensions (e.g., `.mp4`, `.mkv`) |
+| `replaceUnderscore` | `true` | Replace `_` with spaces in filenames |
+| `replaceDots` | `true` | Replace dots with spaces (except file extension) |
+| `showRemainingTime` | `false` | Show remaining time instead of elapsed time |
+
+### Example Configuration
+
+```javascript
+exports.port = 13579
+exports.ignoreBrackets = true
+exports.ignoreFiletype = false
+exports.replaceUnderscore = true
+exports.replaceDots = true
+exports.showRemainingTime = false
 ```
 
-4. Install dependencies using: 
-```sh
-npm i
-``` 
+## 🔄 Updating
 
-> Note: You can safely ignore all peer and optional dependencies warnings as they are not required for the program to work.
+1. Stop the application:
+   ```bash
+   npm stop
+   ```
 
-5. Start the program using: 
-```sh
-npm start
-``` 
-or via
-
-```sh
-node index.js
-``` 
-
-> Note: Using `npm start` will start the program as a background process so you don't need to keep a terminal window open in order to keep the script running. Thus, you may close your terminal window after running this command.
-
-And voilà! It will now show in your Discord profile what you're watching/listening to on MPC.
-
-If you started the program using `npm start` and need MPC-DiscordRPC to stop showing your playback info, just run:
-
-```
-npm stop
-```
-
-## How to update
-
-1. Navigate to the directory where did you cloned/downloaded this project and open a terminal window.
-
-2. Stop the program using:
-
-```sh
-npm stop
-```
-
-3. Update this project by [redownloading this project as a .zip file](https://github.com/angeloanan/MPC-DiscordRPC/archive/master.zip) and replacing the old files. 
-
-   Otherwise, if you have Git installed, run:
-   ```sh
+2. Pull the latest changes:
+   ```bash
    git pull
    ```
 
-4. Start the program again using:
-```sh
-npm start
-```
+3. Install any new dependencies:
+   ```bash
+   npm install
+   ```
 
-Now you may close the terminal. The project is fully up to date!
+4. Start the application:
+   ```bash
+   npm start
+   ```
 
-## `config.js` options
+## 🛠️ How It Works
 
-#### `exports.port`
-Default: `13579`
+This application:
+1. Connects to MPC's Web Interface (running on `localhost:13579`)
+2. Fetches playback data every second
+3. Parses the information (filename, position, duration, state)
+4. Updates your Discord Rich Presence in real-time
+5. Automatically reconnects if connections are lost
 
-Port on which MPC Web Interface is running. See the [How to install](#how-to-install) section above to learn more.
+## 📋 Requirements
 
-#### `exports.ignoreBrackets`
-Default: `true`
+- **Operating System**: Windows
+- **Node.js**: 18.0.0 or higher
+- **MPC-HC/MPC-BE**: Latest version with Web Interface enabled
+- **Discord**: Desktop application (required for Rich Presence)
 
-Whether to omit brackets `[]` and its content in filenames. Useful if you don't want to show on your profile those info tags that usually comes inside brackets in filenames, like `[1080p]`, `[Translator Group Name]`, etc. You can set it to `false` or remove this line to turn off this behavior.
+## 🐛 Troubleshooting
 
-#### `exports.ignoreFiletype`
-Default: `false`
+### Discord Rich Presence Not Showing
 
-Whether to omit filetype. Useful if you don't want to show on your profile the type of the file that is currently open, for example `.mp4`, `.mkv`, `.flac`. You can set it to `true` to turn on this behavior.
+- ✅ Make sure Discord **desktop app** is running (not web version)
+- ✅ Check that MPC Web Interface is enabled
+- ✅ Verify the port in `config.js` matches MPC's port
+- ✅ Restart both Discord and the application
 
-#### `exports.replaceUnderscore`
-Default: `true`
+### Connection Errors
 
-Whether to replace `_` with space. Useful if you have files like `Your_Favourite_Movie`. You can set it to `false` or remove this line to turn off this behavior.
+- ✅ Ensure MPC is running and Web Interface is enabled
+- ✅ Check firewall settings (port `13579` should be accessible)
+- ✅ Verify the port number in `config.js` is correct
 
-#### `exports.replaceDots`
-Default: `true`
+### Updates Not Appearing
 
-Whether to replace dot (`.`) characters (except the file extension one) with spaces. This way, `Your.Favourite.Movie.mp4` will be displayed as `Your Favourite Movie.mp4`. You can set it to `false` or remove this line to turn off this behavior.
+- ✅ Check the log file: `mpc-discordrpc.log`
+- ✅ Ensure you're using the latest version
+- ✅ Try restarting the application: `npm stop && npm start`
 
-#### `exports.showRemainingTime`
-Default: `false`
+## 🤝 Contributing
 
-Whether to display the current file's remaining playback time while playing, instead of showing the elapsed time.
+Contributions are welcome! Feel free to:
+
+- 🐛 Report bugs
+- 💡 Suggest new features
+- 🔧 Submit pull requests
+- 📖 Improve documentation
+
+## 👥 Contributors
+
+<div align="center">
+
+**Maintainer & Modernization (2025)**
+- **[Alex Ionut](https://github.com/nedelcuu)** - *Modernization & Updates*
+
+**Original Creator & Contributors**
+- **[angeloanan](https://github.com/angeloanan)** - *Original Creator*
+- **[Der-Eddy](https://www.eddy-dev.net)** - *Contributor*
+- **[Lucas Miranda](https://github.com/liddack)** - *Contributor*
+- **[MaciejGorczyca](https://github.com/MaciejGorczyca)** - *Contributor*
+
+</div>
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Original project by [angeloanan](https://github.com/angeloanan)
+- Updated and modernized for 2025 with modern Discord RPC features
+- Built with ❤️ for the MPC community
+
+## 📧 Contact
+
+- **GitHub**: [@nedelcuu](https://github.com/nedelcuu)
+- **Email**: contact@alexionut.ro
+- **Website**: [alexionut.ro](https://alexionut.ro)
+
+---
+
+<div align="center">
+
+**Made with ❤️ for Media Player Classic users**
+
+⭐ Star this repo if you find it useful!
+
+</div>
