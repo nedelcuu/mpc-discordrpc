@@ -43,7 +43,7 @@
    - Enable `Listen on port:` (default: `13579`)
    - Click OK
 
-   ![Enable Web Interface](https://cdn.discordapp.com/attachments/416273308540207116/428748994307424256/unknown.png)
+   ![Enable Web Interface](https://i.imgur.com/OrhhIAS.png)
 
 2. **Clone the Repository**
    ```bash
