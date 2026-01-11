@@ -1,6 +1,6 @@
-# 🎬 MPC-DiscordRPC
-
 <div align="center">
+   
+# 🎬 Discord Rich Presence for MPC
 
 **Discord Rich Presence for Media Player Classic (Home Cinema and Black Edition)**
 
